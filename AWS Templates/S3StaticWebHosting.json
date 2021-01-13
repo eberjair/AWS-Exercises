@@ -1,0 +1,64 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Description": "My first template for S3 static web hosting",
+
+  "Parameters": {
+    "BucketName": {
+      "Type": "String",
+      "Default": "ejfa-cf-dg.com"
+    }
+  },
+
+  "Resources": {
+
+    "WebHostingBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": { "Ref": "BucketName" },
+        "WebsiteConfiguration": {
+          "IndexDocument": "index.html",
+          "ErrorDocument": "error.html"
+        }
+      }
+    },
+
+    "PublicAccessPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": { "Ref": "BucketName" },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [ "s3:GetObject" ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    { "Ref": "BucketName" },
+                    "/*"
+                  ]
+                ]
+              },
+              "Principal": "*"
+            }
+          ]
+        }
+      }
+
+    }
+  },
+
+  "Outputs": {
+    "BucketName": {
+      "Description": "Name of the generated bucket",
+      "Value": { "Ref": "BucketName" }
+    },
+    "BucketWebsiteURL": {
+      "Description": "Website URL",
+      "Value": { "Fn::GetAtt": [ "WebHostingBucket", "WebsiteURL" ] }
+    }
+  }
+}
